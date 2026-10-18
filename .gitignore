@@ -8,3 +8,4 @@ web/dist/
 built_model.json
 build_log.jsonl
 .env
+web/tsconfig.tsbuildinfo
