@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+web/node_modules/
+web/dist/
+built_model.json
+build_log.jsonl
+.env

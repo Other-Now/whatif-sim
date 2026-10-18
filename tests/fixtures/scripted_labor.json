@@ -1,0 +1,75 @@
+[
+  {"_comment": "HAND-WRITTEN script, not recorded model output. Drives the pipeline through two repairs.",
+   "tool": "propose_structure",
+   "input": {
+     "name": "labor_market", "time_unit": "month", "horizon": 24,
+     "stocks": [
+       {"name": "employed", "unit": "kpeople", "description": "Employed persons"},
+       {"name": "unemployed", "unit": "kpeople", "description": "Unemployed persons"}],
+     "flows": [
+       {"name": "hires", "from": "unemployed", "to": "employed"},
+       {"name": "separations", "from": "employed", "to": "unemployed"}],
+     "outputs": ["unemployment_rate", "unemployed"]}},
+
+  {"_comment": "Bug: find_rate declared per YEAR in a monthly model -> FLOW_UNIT",
+   "tool": "write_equations",
+   "input": {
+     "initial": {"employed": "employed0", "unemployed": "unemployed0"},
+     "rates": {"hires": "find_rate * demand * unemployed", "separations": "sep_rate * employed"},
+     "aux": [
+       {"name": "unemployment_rate", "expr": "unemployed / (employed + unemployed)", "unit": "1"},
+       {"name": "demand", "expr": "max(demand_floor, 1 - demand_sensitivity * (unemployment_rate - u_ref))", "unit": "1"}],
+     "params": [
+       {"name": "find_rate", "unit": "1/year", "dist": {"kind": "uniform", "low": 2.0, "high": 4.0}},
+       {"name": "sep_rate", "unit": "1/month", "dist": {"kind": "uniform", "low": 0.008, "high": 0.014}},
+       {"name": "employed0", "unit": "kpeople", "dist": {"kind": "fixed", "value": 160000}},
+       {"name": "unemployed0", "unit": "kpeople", "dist": {"kind": "fixed", "value": 7000}},
+       {"name": "u_ref", "unit": "1", "dist": {"kind": "fixed", "value": 0.042}},
+       {"name": "demand_sensitivity", "unit": "1", "dist": {"kind": "uniform", "low": 0, "high": 5}},
+       {"name": "demand_floor", "unit": "1", "dist": {"kind": "fixed", "value": 0.2}}],
+     "scenario": {"name": "find_rate_down_20", "description": "Job-finding rate falls 20% from month 3",
+                  "changes": [{"param": "find_rate", "multiply": 0.8, "from_t": 3}]}}},
+
+  {"_comment": "Repaired: find_rate per month",
+   "tool": "write_equations",
+   "input": {
+     "initial": {"employed": "employed0", "unemployed": "unemployed0"},
+     "rates": {"hires": "find_rate * demand * unemployed", "separations": "sep_rate * employed"},
+     "aux": [
+       {"name": "unemployment_rate", "expr": "unemployed / (employed + unemployed)", "unit": "1"},
+       {"name": "demand", "expr": "max(demand_floor, 1 - demand_sensitivity * (unemployment_rate - u_ref))", "unit": "1"}],
+     "params": [
+       {"name": "find_rate", "unit": "1/month", "dist": {"kind": "uniform", "low": 0.18, "high": 0.32}},
+       {"name": "sep_rate", "unit": "1/month", "dist": {"kind": "uniform", "low": 0.008, "high": 0.014}},
+       {"name": "employed0", "unit": "kpeople", "dist": {"kind": "fixed", "value": 160000}},
+       {"name": "unemployed0", "unit": "kpeople", "dist": {"kind": "fixed", "value": 7000}},
+       {"name": "u_ref", "unit": "1", "dist": {"kind": "fixed", "value": 0.042}},
+       {"name": "demand_sensitivity", "unit": "1", "dist": {"kind": "uniform", "low": 0, "high": 5}},
+       {"name": "demand_floor", "unit": "1", "dist": {"kind": "fixed", "value": 0.2}}],
+     "scenario": {"name": "find_rate_down_20", "description": "Job-finding rate falls 20% from month 3",
+                  "changes": [{"param": "find_rate", "multiply": 0.8, "from_t": 3}]}}},
+
+  {"_comment": "Bugs: UNEMPLOY is not in the catalog; an assumption with no note",
+   "tool": "map_evidence",
+   "input": {"mappings": [
+     {"param": "find_rate", "source": "fred", "series": ["LNS17100000", "UNEMPLOY"], "transform": "flow_over_lagged_level"},
+     {"param": "sep_rate", "source": "fred", "series": ["LNS17400000", "LNS12000000"], "transform": "flow_over_lagged_level"},
+     {"param": "employed0", "source": "fred", "series": ["LNS12000000"], "transform": "latest"},
+     {"param": "unemployed0", "source": "fred", "series": ["LNS13000000"], "transform": "latest"},
+     {"param": "u_ref", "source": "fred", "series": ["LNS13000000", "LNS12000000"], "transform": "share_latest"},
+     {"param": "demand_sensitivity", "source": "assumption", "dist": {"kind": "uniform", "low": 0, "high": 5}},
+     {"param": "demand_floor", "source": "assumption", "note": "Guard so hiring never reaches zero."}]}},
+
+  {"_comment": "Repaired. find_rate carries a made-up dist; the pipeline must ignore it and compute from data.",
+   "tool": "map_evidence",
+   "input": {"mappings": [
+     {"param": "find_rate", "source": "fred", "series": ["LNS17100000", "LNS13000000"], "transform": "flow_over_lagged_level",
+      "dist": {"kind": "fixed", "value": 0.99}},
+     {"param": "sep_rate", "source": "fred", "series": ["LNS17400000", "LNS12000000"], "transform": "flow_over_lagged_level"},
+     {"param": "employed0", "source": "fred", "series": ["LNS12000000"], "transform": "latest"},
+     {"param": "unemployed0", "source": "fred", "series": ["LNS13000000"], "transform": "latest"},
+     {"param": "u_ref", "source": "fred", "series": ["LNS13000000", "LNS12000000"], "transform": "share_latest"},
+     {"param": "demand_sensitivity", "source": "assumption", "dist": {"kind": "uniform", "low": 0, "high": 5},
+      "note": "No direct data; a 1 point rise in unemployment cuts job finding by 0-5%."},
+     {"param": "demand_floor", "source": "assumption", "note": "Guard so hiring never reaches zero."}]}}
+]

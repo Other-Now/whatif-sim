@@ -1,0 +1,22 @@
+name: fetch-fred
+
+# fred.stlouisfed.org isn't reachable from the dev machine, so the snapshot is
+# taken here and downloaded as an artifact. The manifest records URL, fetch
+# time and SHA-256 of each file.
+on:
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - run: python -m whatif fred-fetch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fred-snapshot
+          path: data/fred/
