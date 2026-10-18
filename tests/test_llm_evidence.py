@@ -35,6 +35,18 @@ def test_flow_rate_from_snapshot(fred_dir):
     assert note["n"] == 36 and window.endswith("(36 months)")
 
 
+def test_flow_rate_skips_a_missing_level_month(fred_dir):
+    # drop one level month: the next month's rate must be skipped, not
+    # computed against the level two months back
+    lines = (fred_dir / "LNS13000000.csv").read_text().splitlines()
+    gap = lines[30].split(",")[0]
+    lines[30] = gap + ",-"
+    (fred_dir / "LNS13000000.csv").write_text("\n".join(lines) + "\n")
+    _, window, note = apply("flow_over_lagged_level", ["LNS17100000", "LNS13000000"], 60, fred_dir)
+    assert note["n"] == 58            # 59 possible rates, one loses its t-1 level
+    assert abs(note["median"] - 0.25) < 0.002
+
+
 def test_fill_stamps_provenance(labor, fred_dir):
     spec, _ = fill(labor, LABOR_MAPPING, base=fred_dir)
     p = {x.name: x for x in spec.params}

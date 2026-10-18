@@ -1,0 +1,46 @@
+{
+  "model_file": "labor_market.json",
+  "machine": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "python": "3.12.10",
+  "numpy": "2.5.2",
+  "cpu": "4 cores / 8 threads, Postgres on the same machine",
+  "rows": [
+    {
+      "workers": 1,
+      "batches": 384,
+      "wall_s": 13.7,
+      "batch_phase_s": 11.01,
+      "ms_per_batch": 18.3,
+      "speedup_wall": 1.0,
+      "speedup_batch_phase": 1.0
+    },
+    {
+      "workers": 2,
+      "batches": 384,
+      "wall_s": 9.28,
+      "batch_phase_s": 6.47,
+      "ms_per_batch": 21.1,
+      "speedup_wall": 1.48,
+      "speedup_batch_phase": 1.7
+    },
+    {
+      "workers": 4,
+      "batches": 384,
+      "wall_s": 7.88,
+      "batch_phase_s": 4.59,
+      "ms_per_batch": 32.7,
+      "speedup_wall": 1.74,
+      "speedup_batch_phase": 2.4
+    },
+    {
+      "workers": 6,
+      "batches": 384,
+      "wall_s": 7.36,
+      "batch_phase_s": 3.98,
+      "ms_per_batch": 43.5,
+      "speedup_wall": 1.86,
+      "speedup_batch_phase": 2.77
+    }
+  ],
+  "note": "tol=0 so every run computes exactly the same batches. wall_s includes spawning the worker processes; batch_phase_s is first to last batch completion; ms_per_batch is compute time inside a worker."
+}

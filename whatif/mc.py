@@ -120,9 +120,12 @@ def convergence(stats: list[dict], tol: float) -> dict:
     return out
 
 
-def first_converged(stats: list[dict], cfg: RunConfig) -> Optional[int]:
-    """Smallest prefix length m >= min_batches that meets the tolerance."""
-    for m in range(cfg.min_batches, len(stats) + 1):
+def first_converged(stats: list[dict], cfg: RunConfig, start: int = 0) -> Optional[int]:
+    """Smallest prefix length m >= min_batches that meets the tolerance.
+
+    ``start``: prefixes shorter than this are already known not to converge
+    (stats are immutable once written, so that can't change)."""
+    for m in range(max(cfg.min_batches, start), len(stats) + 1):
         if convergence(stats[:m], cfg.tol)["converged"]:
             return m
     return None

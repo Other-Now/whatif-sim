@@ -51,7 +51,7 @@ def run_workers(rid: int, workers: int, lease_s: float, kill_every: float = 0.0,
             kills += 1
             next_kill = now + kill_every * rng.uniform(0.5, 1.5)
         for i, p in enumerate(procs):          # a worker that exited early (idle) gets replaced
-            if p.poll() is not None and status == "running":
+            if p.poll() is not None and status in ("running", "finishing", "summarizing"):
                 respawns += 1
                 if respawns > 50:
                     raise RuntimeError("workers keep exiting on their own; run `python -m whatif worker` to see why")

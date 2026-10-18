@@ -1,0 +1,6 @@
+propose_structure  attempt 0  accepted 
+write_equations    attempt 0  rejected FLOW_UNIT
+write_equations    attempt 1  accepted 
+map_evidence       attempt 0  rejected EVIDENCE_UNKNOWN_SERIES, PROVENANCE
+map_evidence       attempt 1  accepted 
+wrote built_model.json; loops: B:demand->hires->employed->separations->unemployed->unemployment_rate; R:demand->hires->employed->unemployment_rate; R:demand->hires->unemployed->unemployment_rate; B:employed->separations; R:employed->separations->unemployed->hires; B:hires->unemployed

@@ -1,0 +1,52 @@
+{
+  "LNS12000000": {
+    "title": "Employment Level, thousands of persons, monthly, SA",
+    "url": "https://api.bls.gov/publicAPI/v1/timeseries/data/LNS12000000",
+    "publisher": "BLS (CPS)",
+    "fetched_at": "2026-10-18T12:34:19+00:00",
+    "observations": 140,
+    "first": "2015-01-01",
+    "last": "2026-09-01",
+    "sha256": "a6c412bbd8ad4e4e252ced7b0b26047cfb2b3cb2f268dbf74e54a49861124128"
+  },
+  "LNS13000000": {
+    "title": "Unemployment Level, thousands of persons, monthly, SA",
+    "url": "https://api.bls.gov/publicAPI/v1/timeseries/data/LNS13000000",
+    "publisher": "BLS (CPS)",
+    "fetched_at": "2026-10-18T12:34:20+00:00",
+    "observations": 140,
+    "first": "2015-01-01",
+    "last": "2026-09-01",
+    "sha256": "f0fa3cbcfea47d1dad6ffac754ad1ce2bab2787b9c63250d0360894e565d5ece"
+  },
+  "LNS17100000": {
+    "title": "Labor Force Flows Unemployed to Employed, thousands of persons per month, SA",
+    "url": "https://api.bls.gov/publicAPI/v1/timeseries/data/LNS17100000",
+    "publisher": "BLS (CPS)",
+    "fetched_at": "2026-10-18T12:34:21+00:00",
+    "observations": 139,
+    "first": "2015-01-01",
+    "last": "2026-09-01",
+    "sha256": "111ac20bf6f8ea054be491060fbbd85197cc6852bcadf3f6ed78d7c4f6c4c1de"
+  },
+  "LNS17400000": {
+    "title": "Labor Force Flows Employed to Unemployed, thousands of persons per month, SA",
+    "url": "https://api.bls.gov/publicAPI/v1/timeseries/data/LNS17400000",
+    "publisher": "BLS (CPS)",
+    "fetched_at": "2026-10-18T12:34:22+00:00",
+    "observations": 139,
+    "first": "2015-01-01",
+    "last": "2026-09-01",
+    "sha256": "227e26b873e9b43632b34acf5ce215a449ab51ea04e139c92d7eac4bc8d68726"
+  },
+  "UNRATE": {
+    "title": "Unemployment Rate, percent, monthly, SA",
+    "url": "https://api.bls.gov/publicAPI/v1/timeseries/data/LNS14000000",
+    "publisher": "BLS (CPS)",
+    "fetched_at": "2026-10-18T12:34:23+00:00",
+    "observations": 140,
+    "first": "2015-01-01",
+    "last": "2026-09-01",
+    "sha256": "9f040729ddf77366d1288d170ed0e20a642e55cbe41e1fff7d78d4cf11b1f664"
+  }
+}

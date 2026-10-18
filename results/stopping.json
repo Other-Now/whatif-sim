@@ -1,0 +1,49 @@
+{
+  "model_file": "labor_market.json",
+  "machine": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "python": "3.12.10",
+  "numpy": "2.5.2",
+  "batch_size": 256,
+  "rows": [
+    {
+      "tol": 0.0004,
+      "batches": 10,
+      "samples": 2560,
+      "stopped": "converged",
+      "mean_halfwidth_batch_means": 6.686237224881719e-05,
+      "mean_halfwidth_naive": 4.618277137175408e-05,
+      "p95_halfwidth": 0.0001700584639235736,
+      "wall_s": 0.27
+    },
+    {
+      "tol": 0.0002,
+      "batches": 10,
+      "samples": 2560,
+      "stopped": "converged",
+      "mean_halfwidth_batch_means": 6.686237224881719e-05,
+      "mean_halfwidth_naive": 4.618277137175408e-05,
+      "p95_halfwidth": 0.0001700584639235736,
+      "wall_s": 0.24
+    },
+    {
+      "tol": 0.0001,
+      "batches": 21,
+      "samples": 5376,
+      "stopped": "converged",
+      "mean_halfwidth_batch_means": 3.453856232432434e-05,
+      "mean_halfwidth_naive": 3.199419241303296e-05,
+      "p95_halfwidth": 9.894078398573568e-05,
+      "wall_s": 0.5
+    },
+    {
+      "tol": 5e-05,
+      "batches": 85,
+      "samples": 21760,
+      "stopped": "converged",
+      "mean_halfwidth_batch_means": 1.593640629011175e-05,
+      "mean_halfwidth_naive": 1.5962634638145368e-05,
+      "p95_halfwidth": 4.9716666296915126e-05,
+      "wall_s": 2.06
+    }
+  ]
+}

@@ -93,3 +93,27 @@ def test_api_run_end_to_end(conn, labor_json):
     assert len(res["effect"]["unemployment_rate"]["p50"]) == 25
     md = c.post("/api/brief", json={"run_id": rid}).text
     assert "## Inputs and where they came from" in md
+
+
+def test_summary_claim_taken_over_when_holder_dies(conn, labor, db_url):
+    cfg = RunConfig(scenario="find_rate_down_20", batch_size=16, max_batches=2, tol=0.0)
+    rid = store.create_run(conn, labor, cfg)
+    from whatif.mc import run_batch
+    from whatif.sim import Compiled
+    for _ in range(2):
+        idx, att = store.claim(conn, rid, "w", 60)
+        store.complete(conn, rid, run_batch(Compiled(labor), cfg, idx), att, "w", 1.0)
+    assert store.check_stop(conn, rid, cfg) == "max_batches"
+    a, b = store.connect(db_url), store.connect(db_url)
+    assert store.claim_finalize(a, rid)
+    assert not store.claim_finalize(b, rid)            # a holds it and is alive
+    a.close()                                          # a dies mid-summary
+    for _ in range(50):
+        if store.claim_finalize(b, rid):
+            break
+        time.sleep(0.05)
+    else:
+        raise AssertionError("summary claim was never taken over")
+    assert store.finalize(b, rid)["batches"] == 2
+    assert conn.execute("select status from runs where id=%s", (rid,)).fetchone()[0] == "max_batches"
+    b.close()

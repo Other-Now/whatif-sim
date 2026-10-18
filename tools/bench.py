@@ -139,16 +139,25 @@ def _cli(*args, env=None) -> dict:
     return json.loads(out.stdout)
 
 
-def bench_workers():
+def bench_workers(batches: int = 384):
+    import psycopg
     rows = []
     for w in (1, 2, 4, 6):
-        r = _cli("run", str(MODEL), "--scenario", SCEN, "--tol", "0", "--max-batches", "96",
+        r = _cli("run", str(MODEL), "--scenario", SCEN, "--tol", "0", "--max-batches", str(batches),
                  "--workers", str(w))
-        rows.append({"workers": w, "batches": 96, "wall_s": r["wall_s"]})
+        with psycopg.connect(os.environ.get("WHATIF_DB", "postgresql://whatif:whatif@localhost:5433/whatif")) as c:
+            phase, ms = c.execute(
+                "select extract(epoch from max(finished_at) - min(finished_at)), avg(elapsed_ms) "
+                "from batches where run_id=%s and status='done'", (r["run"],)).fetchone()
+        rows.append({"workers": w, "batches": batches, "wall_s": r["wall_s"],
+                     "batch_phase_s": round(float(phase), 2), "ms_per_batch": round(float(ms), 1)})
     for row in rows:
-        row["speedup"] = round(rows[0]["wall_s"] / row["wall_s"], 2)
-    save("workers", {"cpu_count": os.cpu_count(), "note": "tol=0 so every run computes exactly 96 batches",
-                     "rows": rows})
+        row["speedup_wall"] = round(rows[0]["wall_s"] / row["wall_s"], 2)
+        row["speedup_batch_phase"] = round(rows[0]["batch_phase_s"] / row["batch_phase_s"], 2)
+    save("workers", {"cpu": "4 cores / 8 threads, Postgres on the same machine", "rows": rows,
+                     "note": "tol=0 so every run computes exactly the same batches. wall_s includes "
+                             "spawning the worker processes; batch_phase_s is first to last batch "
+                             "completion; ms_per_batch is compute time inside a worker."})
 
 
 def bench_chaos(reps: int = 5):

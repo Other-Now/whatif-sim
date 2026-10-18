@@ -1,0 +1,57 @@
+:root {
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --text: #1d1d1f;
+  --muted: #6b6b70;
+  --line: #e2e2e0;
+  --base: #2f6fde;
+  --scen: #d9822b;
+  --hot: #c8323c;
+  --ok: #1f8a4c;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161618;
+    --card: #1f1f22;
+    --text: #ececef;
+    --muted: #9a9aa2;
+    --line: #34343a;
+    --base: #6d9cf0;
+    --scen: #f0a35c;
+    --hot: #ef6b73;
+    --ok: #5cc98a;
+  }
+}
+body { margin: 0; background: var(--bg); }
+main { max-width: 1180px; margin: 0 auto; padding: 16px; }
+header h1 { margin: 8px 0 0; font-size: 1.5rem; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin: 16px 0; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+input { flex: 1; min-width: 200px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
+button { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--base); background: var(--base); color: white; cursor: pointer; }
+button.ghost { background: transparent; color: var(--base); }
+button:disabled { opacity: 0.5; cursor: default; }
+.muted { color: var(--muted); }
+.ok { color: var(--ok); font-weight: 600; }
+.error { color: var(--hot); white-space: pre-wrap; }
+.warning { color: var(--scen); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.issues, .loops { padding-left: 18px; font-size: 0.9rem; }
+.loops b.R { color: var(--hot); }
+.loops b.B { color: var(--base); }
+.diagram { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+.diagram .node rect { fill: var(--card); stroke: var(--muted); }
+.diagram .node.stock rect { stroke: var(--text); stroke-width: 2; }
+.diagram .node.flow rect { stroke-dasharray: 3 2; }
+.diagram text { font-size: 11px; fill: var(--text); }
+.diagram .sign { font-size: 13px; font-weight: 700; fill: var(--muted); }
+.fan { margin: 0; }
+.fan figcaption { font-weight: 600; margin-bottom: 4px; }
+.fan svg { width: 100%; height: auto; }
+.fan text { font-size: 10px; fill: var(--muted); }
+.fan .grid { stroke: var(--line); }
+.legend { display: flex; gap: 12px; font-size: 0.85rem; flex-wrap: wrap; }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 2px; }
+.brief { white-space: pre-wrap; background: var(--bg); padding: 12px; border-radius: 6px; font-size: 0.85rem; overflow-x: auto; }

@@ -1,0 +1,202 @@
+{
+  "model_file": "labor_market.json",
+  "machine": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "python": "3.12.10",
+  "numpy": "2.5.2",
+  "caught": 24,
+  "total": 24,
+  "rows": [
+    {
+      "mutation": "rate per year in a monthly model",
+      "expected": "FLOW_UNIT",
+      "got": [
+        "FLOW_UNIT"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "people vs kpeople",
+      "expected": "UNIT_MISMATCH",
+      "got": [
+        "UNIT_MISMATCH"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "add a rate to a stock",
+      "expected": "UNIT_MISMATCH",
+      "got": [
+        "UNIT_MISMATCH"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "bare number added to a flow",
+      "expected": "UNIT_MISMATCH",
+      "got": [
+        "UNIT_MISMATCH"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "undefined name",
+      "expected": "UNKNOWN_NAME",
+      "got": [
+        "UNKNOWN_NAME"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "code injection",
+      "expected": "BAD_EXPR",
+      "got": [
+        "BAD_EXPR"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "attribute access",
+      "expected": "BAD_EXPR",
+      "got": [
+        "BAD_EXPR"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "function not in whitelist",
+      "expected": "BAD_EXPR",
+      "got": [
+        "BAD_EXPR"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "algebraic loop between auxiliaries",
+      "expected": "ALGEBRAIC_LOOP",
+      "got": [
+        "ALGEBRAIC_LOOP"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "flow from a stock to itself",
+      "expected": "FLOW_ENDPOINTS",
+      "got": [
+        "FLOW_ENDPOINTS"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "flow to a stock that doesn't exist",
+      "expected": "FLOW_ENDPOINTS",
+      "got": [
+        "FLOW_ENDPOINTS"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "initial value uses another stock",
+      "expected": "INITIAL_NOT_CONST",
+      "got": [
+        "INITIAL_NOT_CONST"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "uniform low > high",
+      "expected": "PARAM_RANGE",
+      "got": [
+        "PARAM_RANGE"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "lognormal gsd < 1",
+      "expected": "PARAM_RANGE",
+      "got": [
+        "PARAM_RANGE"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "duplicate name",
+      "expected": "DUPLICATE_NAME",
+      "got": [
+        "DUPLICATE_NAME"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "scenario changes unknown parameter",
+      "expected": "SCENARIO_UNKNOWN_PARAM",
+      "got": [
+        "SCENARIO_UNKNOWN_PARAM"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "scenario starts after the horizon",
+      "expected": "SCENARIO_TIME",
+      "got": [
+        "SCENARIO_TIME"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "output that doesn't exist",
+      "expected": "OUTPUT_UNKNOWN",
+      "got": [
+        "OUTPUT_UNKNOWN"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "exp of a dimensioned quantity",
+      "expected": "UNIT_MISMATCH",
+      "got": [
+        "UNIT_MISMATCH"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "rate missing the stock (dimensionless rate)",
+      "expected": "FLOW_UNIT",
+      "got": [
+        "FLOW_UNIT"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "unparseable unit",
+      "expected": "UNIT_PARSE",
+      "got": [
+        "UNIT_PARSE"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "'fred' source with no series",
+      "expected": "PROVENANCE",
+      "got": [
+        "PROVENANCE"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "constant outflow drains a stock below zero",
+      "expected": "NEGATIVE_STOCK",
+      "got": [
+        "NEGATIVE_STOCK"
+      ],
+      "caught": true
+    },
+    {
+      "mutation": "runaway feedback overflows",
+      "expected": "NONFINITE",
+      "got": [
+        "NONFINITE"
+      ],
+      "caught": true
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: whatif
+          POSTGRES_PASSWORD: whatif
+          POSTGRES_DB: whatif_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U whatif" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      WHATIF_TEST_DB: postgresql://whatif:whatif@localhost:5432/whatif_test
+      WHATIF_DB: postgresql://whatif:whatif@localhost:5432/whatif_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev,llm]"
+      - run: pytest -q
+      - name: validate the shipped example
+        run: python -m whatif validate examples/labor_market.json
+      - name: scripted LLM build (no API key; hand-written responses)
+        run: python -m whatif build "What if job finding falls 20%?" --script tests/fixtures/scripted_labor.json
+      - name: chaos (kill workers mid-run, compare to reference)
+        run: |
+          python -m whatif chaos examples/labor_market.json --scenario find_rate_down_20 --kills 10 > chaos.json
+          cat chaos.json
+          python -c "import json,sys; sys.exit(0 if json.load(open('chaos.json'))['identical'] else 1)"
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      - run: npm run build
+      - run: npm test

@@ -1,0 +1,128 @@
+{
+  "model_file": "labor_market.json",
+  "machine": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "python": "3.12.10",
+  "numpy": "2.5.2",
+  "rows": [
+    {
+      "problem": "decay",
+      "rtol": 0.001,
+      "max_abs_err": 3.309032053003323e-06,
+      "steps": 9,
+      "rejected": 0,
+      "fevals": 56
+    },
+    {
+      "problem": "decay",
+      "rtol": 1e-05,
+      "max_abs_err": 2.1381031153357676e-08,
+      "steps": 21,
+      "rejected": 0,
+      "fevals": 128
+    },
+    {
+      "problem": "decay",
+      "rtol": 1e-07,
+      "max_abs_err": 1.7031160650608085e-10,
+      "steps": 48,
+      "rejected": 0,
+      "fevals": 290
+    },
+    {
+      "problem": "decay",
+      "rtol": 1e-09,
+      "max_abs_err": 1.5897452625146524e-12,
+      "steps": 118,
+      "rejected": 0,
+      "fevals": 710
+    },
+    {
+      "problem": "decay",
+      "rtol": 1e-11,
+      "max_abs_err": 1.5312404122447276e-14,
+      "steps": 292,
+      "rejected": 0,
+      "fevals": 1754
+    },
+    {
+      "problem": "logistic",
+      "rtol": 0.001,
+      "max_abs_err": 0.0003076183843226943,
+      "steps": 10,
+      "rejected": 2,
+      "fevals": 74
+    },
+    {
+      "problem": "logistic",
+      "rtol": 1e-05,
+      "max_abs_err": 1.2691572035095078e-05,
+      "steps": 22,
+      "rejected": 2,
+      "fevals": 146
+    },
+    {
+      "problem": "logistic",
+      "rtol": 1e-07,
+      "max_abs_err": 1.6535719460364362e-07,
+      "steps": 50,
+      "rejected": 2,
+      "fevals": 314
+    },
+    {
+      "problem": "logistic",
+      "rtol": 1e-09,
+      "max_abs_err": 1.6246897160954177e-09,
+      "steps": 118,
+      "rejected": 2,
+      "fevals": 722
+    },
+    {
+      "problem": "logistic",
+      "rtol": 1e-11,
+      "max_abs_err": 1.84510184908504e-11,
+      "steps": 291,
+      "rejected": 3,
+      "fevals": 1766
+    },
+    {
+      "problem": "oscillator",
+      "rtol": 0.001,
+      "max_abs_err": 0.01651249884957906,
+      "steps": 45,
+      "rejected": 0,
+      "fevals": 272
+    },
+    {
+      "problem": "oscillator",
+      "rtol": 1e-05,
+      "max_abs_err": 0.00011388712797355538,
+      "steps": 122,
+      "rejected": 25,
+      "fevals": 884
+    },
+    {
+      "problem": "oscillator",
+      "rtol": 1e-07,
+      "max_abs_err": 9.087431904752918e-07,
+      "steps": 315,
+      "rejected": 36,
+      "fevals": 2108
+    },
+    {
+      "problem": "oscillator",
+      "rtol": 1e-09,
+      "max_abs_err": 7.745824870397655e-09,
+      "steps": 805,
+      "rejected": 37,
+      "fevals": 5054
+    },
+    {
+      "problem": "oscillator",
+      "rtol": 1e-11,
+      "max_abs_err": 7.166511828415878e-11,
+      "steps": 2041,
+      "rejected": 26,
+      "fevals": 12404
+    }
+  ]
+}

@@ -38,21 +38,59 @@ TRANSFORMS = {
 }
 
 
-def fetch(series: str, start: str = "2015-01-01") -> tuple[str, str]:
-    """Download one series as CSV. Uses the official API when FRED_API_KEY is
-    set, otherwise the keyless fredgraph.csv endpoint. Returns (csv, url)."""
-    key = os.environ.get("FRED_API_KEY")
-    if key:
-        url = (f"https://api.stlouisfed.org/fred/series/observations?series_id={series}"
-               f"&observation_start={start}&file_type=json&api_key={key}")
-        with urllib.request.urlopen(url, timeout=60) as r:
-            obs = json.load(r)["observations"]
-        text = "observation_date,{}\n".format(series) + "".join(f"{o['date']},{o['value']}\n" for o in obs)
-        return text, url.replace(key, "***")
+# FRED re-publishes these BLS Current Population Survey series under the same
+# ids (UNRATE is BLS LNS14000000). fred.stlouisfed.org's keyless CSV endpoint
+# timed out both from the dev machine and from GitHub's runners, so the
+# snapshot comes from the BLS API unless a FRED API key is configured.
+BLS_ID = {"UNRATE": "LNS14000000"}
+
+
+def _fetch_fred_api(series: str, start: str, key: str) -> tuple[str, str]:
+    url = (f"https://api.stlouisfed.org/fred/series/observations?series_id={series}"
+           f"&observation_start={start}&file_type=json&api_key={key}")
+    with urllib.request.urlopen(url, timeout=60) as r:
+        obs = json.load(r)["observations"]
+    text = f"observation_date,{series}\n" + "".join(f"{o['date']},{o['value']}\n" for o in obs)
+    return text, url.replace(key, "***")
+
+
+def _fetch_bls(series: str, start: str) -> tuple[str, str]:
+    bls = BLS_ID.get(series, series)
+    y0 = int(start[:4])
+    y1 = dt.date.today().year
+    rows: dict[str, str] = {}
+    url = "https://api.bls.gov/publicAPI/v1/timeseries/data/"
+    while y0 <= y1:                       # keyless v1 serves at most 10 years per request
+        body = json.dumps({"seriesid": [bls], "startyear": str(y0), "endyear": str(min(y1, y0 + 9))}).encode()
+        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            res = json.load(r)
+        if res.get("status") != "REQUEST_SUCCEEDED":
+            raise RuntimeError(f"BLS {bls}: {res.get('message')}")
+        for d in res["Results"]["series"][0]["data"]:
+            if d["period"].startswith("M") and d["period"] != "M13":
+                rows[f"{d['year']}-{d['period'][1:]}-01"] = d["value"]
+        y0 += 10
+    text = f"observation_date,{series}\n" + "".join(f"{k},{rows[k]}\n" for k in sorted(rows))
+    return text, f"{url}{bls}"
+
+
+def _fetch_fredgraph(series: str, start: str) -> tuple[str, str]:
     url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}&cosd={start}"
     req = urllib.request.Request(url, headers={"User-Agent": "whatif-sim/0.1"})
     with urllib.request.urlopen(req, timeout=60) as r:
         return r.read().decode(), url
+
+
+def fetch(series: str, start: str = "2015-01-01") -> tuple[str, str]:
+    """Download one monthly series as CSV. Returns (csv text, source URL)."""
+    key = os.environ.get("FRED_API_KEY")
+    if key:
+        return _fetch_fred_api(series, start, key)
+    try:
+        return _fetch_bls(series, start)
+    except Exception:
+        return _fetch_fredgraph(series, start)
 
 
 def snapshot(series: list[str], out: Path = DATA) -> dict:
@@ -66,6 +104,7 @@ def snapshot(series: list[str], out: Path = DATA) -> dict:
         manifest[s] = {
             "title": CATALOG.get(s, ("", ""))[0],
             "url": url,
+            "publisher": "BLS (CPS)" if "bls.gov" in url else "FRED",
             "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
             "observations": len(rows),
             "first": rows[0][0], "last": rows[-1][0],
@@ -81,8 +120,8 @@ def load(series: str, base: Path = DATA) -> list[tuple[str, float]]:
         for rec in csv.reader(f):
             if not rec or rec[0] in ("DATE", "observation_date"):
                 continue
-            if rec[1] in (".", ""):
-                continue          # FRED marks missing observations with "."
+            if rec[1] in (".", "", "-"):
+                continue          # missing: "." on FRED, "-" on BLS (no October 2025 CPS)
             rows.append((rec[0], float(rec[1])))
     return rows
 
@@ -99,13 +138,27 @@ def _lognormal_fit(xs: list[float]) -> tuple[float, float]:
     return math.exp(m), math.exp(sd)
 
 
+def _prev_month(d: str) -> str:
+    y, m = int(d[:4]), int(d[5:7])
+    y, m = (y - 1, 12) if m == 1 else (y, m - 1)
+    return f"{y:04d}-{m:02d}-01"
+
+
 def monthly_rate(flow: str, level: str, window: int, base: Path = DATA) -> tuple[list[float], str, str]:
-    """flow_t / level_{t-1} for the last ``window`` months both series have."""
+    """flow_t / level_{t-1} for the last ``window`` months where both exist.
+
+    t-1 is the previous *calendar* month, looked up by date. The first version
+    paired adjacent rows, which divides by a two-month-old level across a gap
+    (BLS has no October 2025 CPS). On the current snapshot that was latent:
+    BLS also withholds the November 2025 flows, since they need matched
+    October records. The test below makes the gap case explicit.
+    """
     f = dict(load(flow, base))
-    lv = load(level, base)
+    lv = dict(load(level, base))
     rates, dates = [], []
-    for (d0, l0), (d1, _) in zip(lv, lv[1:]):
-        if d1 in f and l0 > 0:
+    for d1 in sorted(f):
+        l0 = lv.get(_prev_month(d1))
+        if l0:
             rates.append(f[d1] / l0)
             dates.append(d1)
     rates, dates = rates[-window:], dates[-window:]
@@ -183,6 +236,7 @@ def fill(spec: ModelSpec, mapping: dict[str, tuple[str, list[str]]], window: int
         p.source.transform = f"{transform}: {TRANSFORMS[transform][1]}"
         p.source.window = win
         p.source.fetched_at = min(man[s]["fetched_at"] for s in series)
+        p.source.note = "via " + ", ".join(sorted({man[s].get("publisher", "FRED") for s in series}))
         notes[name] = note
     return spec, notes
 

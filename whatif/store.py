@@ -12,8 +12,8 @@ session is gone (``backend_pid`` no longer in ``pg_stat_activity``). The second
 check matters: a hard-killed process drops its connection immediately, so its
 batch is reclaimed in milliseconds instead of after the lease. Before it, the
 unfinished batch blocked the finished prefix for a whole lease, the stopping
-rule couldn't fire, and live workers computed 62-174 batches past the stop
-point (results/chaos_before_session_check.jsonl).
+rule couldn't fire, and live workers computed 77-103 batches past the stop
+point per run; with it, 1 (results/chaos.json, 5 runs each).
 
 ``attempt`` is a fencing token. A worker that stalls past its lease and then
 wakes up can't overwrite the batch, because its completion UPDATE requires
@@ -42,8 +42,11 @@ create table if not exists runs (
     finished_at  timestamptz,
     model        jsonb not null,
     config       jsonb not null,
-    status       text not null default 'running',   -- running | converged | max_batches | failed
+    status       text not null default 'running',   -- running | finishing | summarizing | converged | max_batches
     stop_batch   int,
+    checked_upto int not null default 0,                -- prefixes shorter than this didn't converge
+    finalizer_pid int,                                   -- backend of the worker building the summary
+    finalize_until timestamptz,
     summary      jsonb
 );
 create table if not exists batches (
@@ -175,8 +178,16 @@ def check_stop(conn, rid: int, cfg: RunConfig) -> Optional[str]:
     Uses the *smallest* converging prefix, so the answer is the same however
     the batches were scheduled. Only one caller wins the conditional UPDATE.
     """
+    checked = conn.execute("select checked_upto from runs where id=%s", (rid,)).fetchone()[0]
     stats = done_prefix_stats(conn, rid)
-    m = first_converged(stats, cfg)
+    if len(stats) < checked and len(stats) < cfg.max_batches:
+        return None
+    m = first_converged(stats, cfg, start=checked)
+    if m is None:
+        # Incremental: the next check starts after this prefix. greatest()
+        # because another worker may have checked a longer prefix already.
+        conn.execute("update runs set checked_upto=greatest(checked_upto, %s) where id=%s",
+                     (len(stats) + 1, rid))
     status = None
     if m is not None:
         status = "converged"
@@ -189,6 +200,25 @@ def check_stop(conn, rid: int, cfg: RunConfig) -> Optional[str]:
         (m, rid),
     )
     return status
+
+
+def claim_finalize(conn, rid: int, lease_s: float = 120.0) -> bool:
+    """Exactly one worker builds the summary (it loads every batch's
+    trajectories, ~115 MB for 384 batches). When every idle worker did it,
+    they fought over the CPU and the summary step took 6 s instead of 3.
+    The claim is taken over the same way as a batch claim: lease expiry or
+    the holder's Postgres session disappearing."""
+    row = conn.execute(
+        f"""
+        update runs set status='summarizing', finalizer_pid=pg_backend_pid(),
+               finalize_until = now() + make_interval(secs => %s)
+        where id=%s and (status='finishing'
+              or (status='summarizing' and (finalize_until < now() {_DEAD.replace('backend_pid', 'finalizer_pid')})))
+        returning id
+        """,
+        (lease_s, rid),
+    ).fetchone()
+    return row is not None
 
 
 def finalize(conn, rid: int) -> Optional[dict]:
@@ -213,30 +243,27 @@ def finalize(conn, rid: int) -> Optional[dict]:
     return res
 
 
-def work(rid: int, worker: Optional[str] = None, lease_s: float = 5.0, url: Optional[str] = None,
-         idle_exit_s: float = 2.0) -> dict:
+def work(rid: int, worker: Optional[str] = None, lease_s: float = 5.0, url: Optional[str] = None) -> dict:
     """Worker loop. Safe to run any number of these, and to kill them anytime."""
     worker = worker or f"{os.getpid()}-{uuid.uuid4().hex[:6]}"
     conn = connect(url)
     spec, cfg, _ = load_run(conn, rid)
     comp = Compiled(spec)
     done = fenced = 0
-    idle_since = None
     while True:
         status = conn.execute("select status from runs where id=%s", (rid,)).fetchone()[0]
         if status in ("converged", "max_batches", "failed"):
             break
         got = claim(conn, rid, worker, lease_s)
         if got is None:
-            # nothing claimable: either finishing up or others hold leases
-            if status == "finishing" and finalize(conn, rid) is not None:
+            # Nothing claimable. Either others hold the remaining leases
+            # (wait; they may die), or the run is finishing: one worker wins
+            # the summary, the rest wait in case it dies and needs replacing.
+            if status in ("finishing", "summarizing") and claim_finalize(conn, rid):
+                finalize(conn, rid)
                 break
-            idle_since = idle_since or time.monotonic()
-            if time.monotonic() - idle_since > idle_exit_s and status != "running":
-                break
-            time.sleep(0.05)
+            time.sleep(0.05 if status == "running" else 0.2)
             continue
-        idle_since = None
         idx, attempt = got
         t0 = time.perf_counter()
         b = run_batch(comp, cfg, idx)

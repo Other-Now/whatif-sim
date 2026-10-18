@@ -1,0 +1,13 @@
+{
+  "model_file": "labor_market.json",
+  "machine": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "python": "3.12.10",
+  "numpy": "2.5.2",
+  "samples": 20000,
+  "effect_mean_crn": 0.009470089050133766,
+  "effect_mean_independent": 0.009440408208202047,
+  "var_effect_crn": 1.4643599639852895e-06,
+  "var_effect_independent": 3.91493075368516e-05,
+  "variance_reduction": 26.734756821885412,
+  "note": "samples needed for the same CI shrink by the variance ratio"
+}

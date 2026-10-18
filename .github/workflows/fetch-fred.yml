@@ -1,8 +1,9 @@
 name: fetch-fred
 
-# fred.stlouisfed.org isn't reachable from the dev machine, so the snapshot is
-# taken here and downloaded as an artifact. The manifest records URL, fetch
-# time and SHA-256 of each file.
+# Refresh the data snapshot. Uses the FRED API if the FRED_API_KEY secret is
+# set, otherwise the BLS API (same series ids). fred.stlouisfed.org's keyless
+# CSV endpoint timed out from both the dev machine and GitHub's runners.
+# The manifest records source URL, fetch time and SHA-256 of each file.
 on:
   workflow_dispatch:
 
@@ -16,6 +17,8 @@ jobs:
           python-version: "3.12"
       - run: pip install -e .
       - run: python -m whatif fred-fetch
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
       - uses: actions/upload-artifact@v4
         with:
           name: fred-snapshot

@@ -93,7 +93,7 @@ class Compiled:
             e = self.env(P, y)
             dy = np.zeros_like(y)
             for fn, src, dst in self.flow_fns:
-                r = np.broadcast_to(fn(e), (y.shape[0],))
+                r = fn(e)                       # usually already (n,); scalars broadcast on +=/-=
                 if src is not None:
                     dy[:, src] -= r
                 if dst is not None:

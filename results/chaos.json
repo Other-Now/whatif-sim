@@ -1,0 +1,110 @@
+{
+  "model_file": "labor_market.json",
+  "machine": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+  "python": "3.12.10",
+  "numpy": "2.5.2",
+  "lease_only": [
+    {
+      "identical": true,
+      "kills": 20,
+      "wasted_batches": 90,
+      "retried_claims": 6,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 125.7,
+      "reference_wall_s": 3.33
+    },
+    {
+      "identical": true,
+      "kills": 18,
+      "wasted_batches": 89,
+      "retried_claims": 3,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 5.16,
+      "reference_wall_s": 3.14
+    },
+    {
+      "identical": true,
+      "kills": 20,
+      "wasted_batches": 97,
+      "retried_claims": 4,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 125.03,
+      "reference_wall_s": 3.16
+    },
+    {
+      "identical": true,
+      "kills": 15,
+      "wasted_batches": 77,
+      "retried_claims": 4,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 4.55,
+      "reference_wall_s": 3.17
+    },
+    {
+      "identical": true,
+      "kills": 17,
+      "wasted_batches": 103,
+      "retried_claims": 2,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 5.16,
+      "reference_wall_s": 3.17
+    }
+  ],
+  "lease_or_dead_session": [
+    {
+      "identical": true,
+      "kills": 13,
+      "wasted_batches": 1,
+      "retried_claims": 2,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 3.56,
+      "reference_wall_s": 3.14
+    },
+    {
+      "identical": true,
+      "kills": 13,
+      "wasted_batches": 1,
+      "retried_claims": 4,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 3.73,
+      "reference_wall_s": 3.23
+    },
+    {
+      "identical": true,
+      "kills": 13,
+      "wasted_batches": 1,
+      "retried_claims": 4,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 3.58,
+      "reference_wall_s": 3.23
+    },
+    {
+      "identical": true,
+      "kills": 13,
+      "wasted_batches": 1,
+      "retried_claims": 4,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 3.77,
+      "reference_wall_s": 3.17
+    },
+    {
+      "identical": true,
+      "kills": 13,
+      "wasted_batches": 1,
+      "retried_claims": 5,
+      "fenced_writes": 0,
+      "stop_batch": 85,
+      "wall_s": 3.88,
+      "reference_wall_s": 3.56
+    }
+  ]
+}

@@ -40,6 +40,7 @@ def render(spec: ModelSpec, summary: dict, report: Report, sobol: Optional[dict]
     if sc:
         s = summary["scenario"][out_name]
         conv = summary["convergence"]["mean"]
+        hw = f"{100 * conv['halfwidth']:.3f} pp" if unit == "1" else f"{conv['halfwidth']:.3g} {unit}"
         L += [
             f"At {spec.time_unit} {T:g}, `{out_name}` changes by **{eff(tr['mean'])}** versus baseline "
             f"(90% of runs between {eff(tr['p05'])} and {eff(tr['p95'])}).",
@@ -50,7 +51,7 @@ def render(spec: ModelSpec, summary: dict, report: Report, sobol: Optional[dict]
             f"| scenario | {_fmt(s['p50'][-1], unit)} | {_fmt(s['p05'][-1], unit)} - {_fmt(s['p95'][-1], unit)} |",
             "",
             f"Monte Carlo: {summary['samples']:,} parameter draws in {summary['batches']} batches "
-            f"({summary['stopped']}); the mean effect's 95% half-width is {eff(conv['halfwidth']).lstrip('+')}. "
+            f"({summary['stopped']}); the mean effect's 95% half-width is {hw}. "
             "Baseline and scenario share the same draws (common random numbers).",
         ]
     else:
@@ -86,8 +87,10 @@ def render(spec: ModelSpec, summary: dict, report: Report, sobol: Optional[dict]
                "triangular": lambda: f"triangular({d.low:g}, {d.mode:g}, {d.high:g})",
                "lognormal": lambda: f"lognormal(median {d.median:.4g}, gsd {d.gsd:.3f})"}[d.kind]()
         if p.source.kind == "fred":
-            src = (f"FRED {', '.join(p.source.series)}; {p.source.transform}; "
-                   f"window {p.source.window or '?'}; fetched {p.source.fetched_at or '?'}")
+            ids = ", ".join(p.source.series)
+            who = (f"BLS CPS {ids} (same ids on FRED)" if "BLS" in p.source.note else f"FRED {ids}")
+            src = (f"{who}; "
+                   f"{p.source.transform}; window {p.source.window or '?'}; fetched {p.source.fetched_at or '?'}")
         else:
             src = f"**assumption**: {p.source.note or '(no justification given)'}"
         L.append(f"| `{p.name}` [{p.unit}] | {val} | {src} |")
